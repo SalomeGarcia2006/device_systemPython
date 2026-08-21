@@ -52,43 +52,44 @@ http://127.0.0.1:8000/docs
 
 Se muestra la documentación automática de la API generada por FastAPI.
 
-**[PEGAR AQUÍ LA CAPTURA DE SWAGGER UI]**
+<img width="1112" height="880" alt="image" src="https://github.com/user-attachments/assets/68aba06e-0d5c-4810-84c3-4e53be818e31" />
+
 
 ### GET /users
 
 Se realiza una petición GET para consultar todos los usuarios registrados.
 
-**[PEGAR AQUÍ LA CAPTURA DE THUNDER CLIENT DEL GET /users]**
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a2cf4a88-a3f7-4929-b48c-5ba7cc16b048" />
 
-### GET /users/{user_id}
 
-Se utiliza un Path Parameter para consultar un usuario específico mediante su ID.
 
-**[PEGAR AQUÍ LA CAPTURA DEL GET /users/{user_id}]**
+
 
 ### GET /users?role=admin
 
 Se utiliza un Query Parameter para filtrar los usuarios según su rol.
 
-**[PEGAR AQUÍ LA CAPTURA DEL FILTRO POR ROL]**
+<img width="1919" height="1076" alt="image" src="https://github.com/user-attachments/assets/34503f2c-4499-4198-b693-594e506df9bd" />
 
 ### GET /users?is_active=true
 
 Se utiliza un Query Parameter para filtrar los usuarios según su estado activo o inactivo.
 
-**[PEGAR AQUÍ LA CAPTURA DEL FILTRO POR ESTADO]**
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e9808c66-1848-4dc2-9104-03577d92288a" />
+
 
 ### POST /users
 
 Se realiza una petición POST para registrar un nuevo usuario.
 
-**[PEGAR AQUÍ LA CAPTURA DEL POST /users]**
+<img width="921" height="493" alt="image" src="https://github.com/user-attachments/assets/78a8485d-3360-4487-8ab0-bf15af49f039" />
+
 
 ### Validación de datos
 
 La API valida los datos enviados y devuelve un error cuando la información no cumple con las condiciones establecidas.
+<img width="921" height="636" alt="image" src="https://github.com/user-attachments/assets/75878807-fb0d-483c-a37e-50a8cef5b657" />
 
-**[PEGAR AQUÍ LA CAPTURA DEL ERROR DE VALIDACIÓN]**
 
 ### Cabeceras HTTP
 
@@ -97,7 +98,7 @@ La API devuelve las siguientes cabeceras personalizadas:
 - `X-App-Name: device_systems`
 - `X-API-Version: 1.0`
 
-**[PEGAR AQUÍ LA CAPTURA DE LOS HEADERS]**
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9e0b3ac7-63ea-452d-8443-319afdd11dbf" />
 
 ## Conclusión
 
