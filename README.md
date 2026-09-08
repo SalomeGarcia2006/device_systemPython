@@ -18,6 +18,9 @@ Instalar las dependencias con:
 
 ```bash
 pip install fastapi uvicorn
+```Crear el entono
+```bash
+ python -m venv venv
 ```
 
 ## Ejecución
