@@ -3,10 +3,11 @@ from typing import Optional
 
 from app.schemas.user_schema import UserResponse, UserCreate
 
+
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-# Lista de usuarios json simulada
+# Lista de usuarios JSON simulada
 users = [
     {
         "id": 1,
@@ -32,42 +33,14 @@ users = [
 ]
 
 
-# GET /users
-# Obtener todos los usuarios
-@router.get("", response_model=list[UserResponse])
-def get_users(
-    response: Response,
-    role: Optional[str] = Query(default=None),
-    is_active: Optional[bool] = Query(default=None)
-):
-    response.headers["X-App-Name"] = "device_systems"
-    response.headers["X-API-Version"] = "1.0"
-    result = users
+# --------------------------------------------------
+# GET - Buscar usuario por ID
+# --------------------------------------------------
 
-    # Filtrar por rol
-    if role is not None:
-        result = [
-            user for user in result
-            if user["role"] == role
-        ]
-
-    # Filtrar por estado
-    if is_active is not None:
-        result = [
-            user for user in result
-            if user["is_active"] == is_active
-        ]
-
-    return result
-
-
-# GET /users/{user_id}
-# Obtener un usuario por ID
-@router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: int):
-
+@router.get("/{id}")
+def buscar_usuario(id: int):
     for user in users:
-        if user["id"] == user_id:
+        if user["id"] == id:
             return user
 
     raise HTTPException(
@@ -76,48 +49,80 @@ def get_user(user_id: int):
     )
 
 
-# POST /users
-# Crear un nuevo usuario
+# --------------------------------------------------
+# GET - Todos los usuarios
+# --------------------------------------------------
+
+@router.get("")
+def buscar_todos_los_usuarios():
+    return users
 
 
-@router.post("", response_model=UserResponse, status_code=201)
-def create_user(user: UserCreate):
+# --------------------------------------------------
+# GET - Filtrar usuarios por rol
+# --------------------------------------------------
 
-    # Validar nombre
-    if len(user.name) < 3:
+@router.get("/")
+def buscar_rol(role: str = Query(...)):
+    usuarios = []
+
+    for user in users:
+        if user["role"] == role:
+            usuarios.append(user)
+
+    return usuarios
+
+
+# --------------------------------------------------
+# GET - Filtrar usuarios por estado
+# --------------------------------------------------
+
+@router.get("/estado/estado")
+def get_usuarios_por_estado(is_active: bool = Query(...)):
+    usuarios_filtrados = [
+        u for u in users
+        if u["is_active"] == is_active
+    ]
+
+    if not usuarios_filtrados:
         raise HTTPException(
-            status_code=400,
-            detail="El nombre debe tener mínimo 3 caracteres"
+            status_code=404,
+            detail="No hay usuarios con ese estado"
         )
 
-    # Validar rol
-    if user.role not in ["admin", "support", "user"]:
-        raise HTTPException(
-            status_code=400,
-            detail="El rol debe ser admin, support o user"
-        )
+    return usuarios_filtrados
 
+
+# --------------------------------------------------
+# POST - Crear usuario
+# --------------------------------------------------
+
+@router.post("/", response_model=UserResponse)
+def crear_usuario(
+    usuario: UserCreate,
+    response: Response
+):
     # Verificar correo duplicado
-    for existing_user in users:
-        if existing_user["email"] == user.email:
+    for user in users:
+        if user["email"] == usuario.email:
             raise HTTPException(
                 status_code=400,
                 detail="El correo ya está registrado"
             )
 
-    # Crear nuevo ID
-    new_id = len(users) + 1
-
     # Crear nuevo usuario
-    new_user = {
-        "id": new_id,
-        "name": user.name,
-        "email": user.email,
-        "role": user.role,
-        "is_active": user.is_active
+    nuevo_usuario = {
+        "id": len(users) + 1,
+        "name": usuario.name,
+        "email": usuario.email,
+        "role": usuario.role,
+        "is_active": usuario.is_active
     }
 
-    # Guardar usuario
-    users.append(new_user)
+    users.append(nuevo_usuario)
 
-    return new_user
+    # Cabeceras personalizadas
+    response.headers["X-App-Name"] = "device_systems"
+    response.headers["X-API-Version"] = "1.0"
+
+    return nuevo_usuario
