@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Response
 from typing import Optional
 
-from app.schemas.user_schema import UserResponse, UserCreate
-
+from app.schemas.user_schema import UserResponse, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -33,9 +32,8 @@ users = [
 ]
 
 
-# --------------------------------------------------
+
 # GET - Buscar usuario por ID
-# --------------------------------------------------
 
 @router.get("/{id}")
 def buscar_usuario(id: int):
@@ -49,18 +47,17 @@ def buscar_usuario(id: int):
     )
 
 
-# --------------------------------------------------
 # GET - Todos los usuarios
-# --------------------------------------------------
+
 
 @router.get("")
 def buscar_todos_los_usuarios():
     return users
 
 
-# --------------------------------------------------
+
 # GET - Filtrar usuarios por rol
-# --------------------------------------------------
+
 
 @router.get("/")
 def buscar_rol(role: str = Query(...)):
@@ -73,9 +70,9 @@ def buscar_rol(role: str = Query(...)):
     return usuarios
 
 
-# --------------------------------------------------
+
 # GET - Filtrar usuarios por estado
-# --------------------------------------------------
+
 
 @router.get("/estado/estado")
 def get_usuarios_por_estado(is_active: bool = Query(...)):
@@ -93,9 +90,9 @@ def get_usuarios_por_estado(is_active: bool = Query(...)):
     return usuarios_filtrados
 
 
-# --------------------------------------------------
+
 # POST - Crear usuario
-# --------------------------------------------------
+
 
 @router.post("/", response_model=UserResponse)
 def crear_usuario(
@@ -126,3 +123,48 @@ def crear_usuario(
     response.headers["X-API-Version"] = "1.0"
 
     return nuevo_usuario
+
+
+
+
+#PUT
+@router.put("/{id}", response_model=UserResponse)
+def actualizar_usuario(id: int, usuario: UserCreate):
+    for user in users:
+        if user["id"] == id:
+            user["name"] = usuario.name
+            user["email"] = usuario.email
+            user["role"] = usuario.role
+            user["is_active"] = usuario.is_active
+
+            return user
+
+    raise HTTPException(
+        status_code=404,
+        detail="Usuario no encontrado"
+    )
+
+# Patch 
+
+
+@router.patch("/{id}", response_model=UserResponse)
+def actualizar_parcialmente_usuario(id: int, usuario: UserUpdate):
+    for user in users:
+        if user["id"] == id:
+
+            datos_actualizados = usuario.model_dump(exclude_unset=True)
+
+            if not datos_actualizados:
+                raise HTTPException(
+                    status_code=400,
+                    detail="No se enviaron campos para actualizar"
+                )
+
+            user.update(datos_actualizados)
+
+            return user
+
+    raise HTTPException(
+        status_code=404,
+        detail="Usuario no encontrado"
+    )
