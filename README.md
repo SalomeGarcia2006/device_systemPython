@@ -14,15 +14,17 @@ Device Systems es una API REST desarrollada con FastAPI para la gestión de usua
 
 ## Instalación
 
-Instalar las dependencias con:
 
-```bash
-pip install fastapi uvicorn
-```Crear el entono
+
+# Crear el entono
 ```bash
  python -m venv venv
 ```
+# Instalar las dependencias con:
 
+```bash
+pip install fastapi uvicorn
+```
 ## Ejecución
 
 Para iniciar el servidor:
