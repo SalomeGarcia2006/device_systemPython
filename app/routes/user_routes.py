@@ -1,170 +1,57 @@
-from fastapi import APIRouter, HTTPException, Query, Response
-from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from app.schemas.user_schema import UserResponse, UserCreate, UserUpdate
+from app.database import get_db
+from app.schemas.user_schema import UserCreate, UserUpdatePartial, UserResponse
+from app.services.user_service import (
+    create_user,
+    get_users,
+    get_user,
+    update_user,
+    update_user_partial,
+    delete_user
+)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-# Lista de usuarios JSON simulada
-users = [
-    {
-        "id": 1,
-        "name": "Administrador",
-        "email": "admin@devicesystems.com",
-        "role": "admin",
-        "is_active": True
-    },
-    {
-        "id": 2,
-        "name": "Soporte",
-        "email": "support@devicesystems.com",
-        "role": "support",
-        "is_active": True
-    },
-    {
-        "id": 3,
-        "name": "Usuario",
-        "email": "user@devicesystems.com",
-        "role": "user",
-        "is_active": False
-    }
-]
+@router.get("/", response_model=list[UserResponse])
+def list_users(db: Session = Depends(get_db)):
+    return get_users(db)
 
 
-
-# GET - Buscar usuario por ID
-
-@router.get("/{id}")
-def buscar_usuario(id: int):
-    for user in users:
-        if user["id"] == id:
-            return user
-
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
-
-
-# GET - Todos los usuarios
-
-
-@router.get("")
-def buscar_todos_los_usuarios():
-    return users
-
-
-
-# GET - Filtrar usuarios por rol
-
-
-@router.get("/")
-def buscar_rol(role: str = Query(...)):
-    usuarios = []
-
-    for user in users:
-        if user["role"] == role:
-            usuarios.append(user)
-
-    return usuarios
-
-
-
-# GET - Filtrar usuarios por estado
-
-
-@router.get("/estado/estado")
-def get_usuarios_por_estado(is_active: bool = Query(...)):
-    usuarios_filtrados = [
-        u for u in users
-        if u["is_active"] == is_active
-    ]
-
-    if not usuarios_filtrados:
-        raise HTTPException(
-            status_code=404,
-            detail="No hay usuarios con ese estado"
-        )
-
-    return usuarios_filtrados
-
-
-
-# POST - Crear usuario
+@router.get("/{user_id}", response_model=UserResponse)
+def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+    user = get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user
 
 
 @router.post("/", response_model=UserResponse)
-def crear_usuario(
-    usuario: UserCreate,
-    response: Response
-):
-    # Verificar correo duplicado
-    for user in users:
-        if user["email"] == usuario.email:
-            raise HTTPException(
-                status_code=400,
-                detail="El correo ya está registrado"
-            )
-
-    # Crear nuevo usuario
-    nuevo_usuario = {
-        "id": len(users) + 1,
-        "name": usuario.name,
-        "email": usuario.email,
-        "role": usuario.role,
-        "is_active": usuario.is_active
-    }
-
-    users.append(nuevo_usuario)
-
-    # Cabeceras personalizadas
-    response.headers["X-App-Name"] = "device_systems"
-    response.headers["X-API-Version"] = "1.0"
-
-    return nuevo_usuario
+def create_user_route(data: UserCreate, db: Session = Depends(get_db)):
+    return create_user(db, data)
 
 
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user_route(user_id: int, data: UserCreate, db: Session = Depends(get_db)):
+    user = update_user(db, user_id, data)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user
 
 
-#PUT
-@router.put("/{id}", response_model=UserResponse)
-def actualizar_usuario(id: int, usuario: UserCreate):
-    for user in users:
-        if user["id"] == id:
-            user["name"] = usuario.name
-            user["email"] = usuario.email
-            user["role"] = usuario.role
-            user["is_active"] = usuario.is_active
-
-            return user
-
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
-
-# Patch 
+@router.patch("/{user_id}", response_model=UserResponse)
+def update_user_partial_route(user_id: int, data: UserUpdatePartial, db: Session = Depends(get_db)):
+    user = update_user_partial(db, user_id, data)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user
 
 
-@router.patch("/{id}", response_model=UserResponse)
-def actualizar_parcialmente_usuario(id: int, usuario: UserUpdate):
-    for user in users:
-        if user["id"] == id:
-
-            datos_actualizados = usuario.model_dump(exclude_unset=True)
-
-            if not datos_actualizados:
-                raise HTTPException(
-                    status_code=400,
-                    detail="No se enviaron campos para actualizar"
-                )
-
-            user.update(datos_actualizados)
-
-            return user
-
-    raise HTTPException(
-        status_code=404,
-        detail="Usuario no encontrado"
-    )
+@router.delete("/{user_id}")
+def delete_user_route(user_id: int, db: Session = Depends(get_db)):
+    user = delete_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": "Usuario eliminado correctamente"}
