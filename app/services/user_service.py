@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, update
-from app.models import User
+from app.models.user_model import User
 from app.schemas.user_schema import UserCreate, UserUpdatePartial
 
 
