@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
 
 class RoleEnum(str, Enum):
     admin = "admin"
@@ -12,7 +14,8 @@ class RoleEnum(str, Enum):
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=100)
     email: EmailStr
-    role: RoleEnum
+    password: str = Field(..., min_length=8, max_length=128)
+    role: RoleEnum = RoleEnum.user
     is_active: bool = True
 
 
@@ -38,5 +41,4 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
